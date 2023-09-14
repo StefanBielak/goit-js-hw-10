@@ -1,36 +1,24 @@
-const apiKey ='live_ka2m1P8rv1NcOtq9gpyuZNI1Ep4W18znJylG9WiZefkH0Ni1Uhna0Bm5WHcXcgdT';
-const loader = document.getElementById('loader');
-const error = document.getElementById('error');
+import axios from 'axios';
 
-async function fetchBreeds() {
+axios.defaults.headers.common['x-api-key'] =
+  'live_ka2m1P8rv1NcOtq9gpyuZNI1Ep4W18znJylG9WiZefkH0Ni1Uhna0Bm5WHcXcgdT';
+
+export async function fetchBreeds() {
   try {
-    const response = await fetch('https://api.thecatapi.com/v1/breeds', {
-      headers: {
-        'x-api-key': apiKey,
-      },
-    });
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    throw err;
+    const response = await axios.get('https://api.thecatapi.com/v1/breeds');
+    return response.data;
+  } catch (error) {
+    throw error;
   }
 }
 
-async function fetchCatByBreed(breedId) {
+export async function fetchCatByBreed(breedId) {
   try {
-    const response = await fetch(
-      `https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}`,
-      {
-        headers: {
-          'x-api-key': apiKey,
-        },
-      }
+    const response = await axios.get(
+      `https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}`
     );
-    const data = await response.json();
-    return data[0];
-  } catch (err) {
-    throw err;
+    return response.data[0];
+  } catch (error) {
+    throw error;
   }
 }
-
-export { fetchBreeds, fetchCatByBreed, loader, error };

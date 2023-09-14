@@ -1,19 +1,17 @@
-import { fetchBreeds, fetchCatByBreed, loader, error } from './cat-api.js';
+import { fetchBreeds, fetchCatByBreed } from './cat-api.js';
 
 const breedSelect = document.getElementById('breed-select');
-const catInfo = document.getElementById('cat-info');
-const catName = document.getElementById('cat-name');
-const catDescription = document.getElementById('cat-description');
-const catTemperament = document.getElementById('cat-temperament');
-const catImage = document.getElementById('cat-image');
+const loader = document.querySelector('.loader');
+const error = document.querySelector('.error');
+const catInfo = document.querySelector('.cat-info');
+const catImage = document.querySelector('.cat-image');
+const catName = document.querySelector('.cat-name');
+const catDescription = document.querySelector('.cat-description');
+const catTemperament = document.querySelector('.cat-temperament');
 
 async function populateBreedSelect() {
   try {
-    loader.style.display = 'block';
-    error.textContent = '';
-
     const breeds = await fetchBreeds();
-
     breeds.forEach(breed => {
       const option = document.createElement('option');
       option.value = breed.id;
@@ -21,34 +19,38 @@ async function populateBreedSelect() {
       breedSelect.appendChild(option);
     });
   } catch (err) {
-    error.textContent = 'Failed to fetch cat breeds.';
+    showError('Failed to fetch breeds.');
   } finally {
     loader.style.display = 'none';
   }
 }
 
-async function displayCatInfo(breedId) {
+breedSelect.addEventListener('change', async () => {
+  const selectedBreedId = breedSelect.value;
+  loader.style.display = 'block';
+  catInfo.style.display = 'none';
+  error.style.display = 'none';
+
   try {
-    loader.style.display = 'block';
-    error.textContent = '';
-
-    const cat = await fetchCatByBreed(breedId);
-
-    catName.textContent = cat.breeds[0].name;
-    catDescription.textContent = cat.breeds[0].description;
-    catTemperament.textContent = cat.breeds[0].temperament;
-    catImage.src = cat.url;
-
-    catInfo.style.display = 'block';
+    const catData = await fetchCatByBreed(selectedBreedId);
+    displayCatInfo(catData);
   } catch (err) {
-    error.textContent = 'Failed to fetch cat information.';
+    showError('Failed to fetch cat information.');
   } finally {
     loader.style.display = 'none';
   }
+});
+
+function displayCatInfo(catData) {
+  catImage.src = catData.url;
+  catName.textContent = catData.breeds[0].name;
+  catDescription.textContent = catData.breeds[0].description;
+  catTemperament.textContent = `Temperament: ${catData.breeds[0].temperament}`;
+  catInfo.style.display = 'block';
 }
 
-breedSelect.addEventListener('change', event => {
-  const selectedBreedId = event.target.value;
-  displayCatInfo(selectedBreedId);
-});
+function showError(message) {
+  error.textContent = message;
+  error.style.display = 'block';
+}
 populateBreedSelect();
